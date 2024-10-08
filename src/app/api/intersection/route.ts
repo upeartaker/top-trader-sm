@@ -26,9 +26,10 @@ export async function POST(request: Request) {
   if (!Array.isArray(params?.biz) || params?.biz.length < 1) {
     return Response.json([])
   }
+  const chain = params.chain || 'sol'
   const getTopTraders = params.biz.map((addr: string) => {
     return fetch(
-      `https://gmgn.ai/defi/quotation/v1/tokens/top_traders/sol/${addr}?orderby=realized_profit&direction=desc`,
+      `https://gmgn.ai/defi/quotation/v1/tokens/top_traders/${chain}/${addr}?orderby=realized_profit&direction=desc`,
       {
         method: 'GET',
       }
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
     const res = getArrayIntersection(addressList)
     return Response.json(res)
   } catch (error) {
+    console.log("🚀 ~ POST ~ error:", error)
     return Response.json([])
   }
 }

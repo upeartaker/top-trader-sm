@@ -2,6 +2,7 @@
 import { useState } from 'react'
 const MODAL_ID = 'modal'
 export default function Home() {
+  const [chain, setChain] = useState('sol')
   const [biz, setBiz] = useState([
     {
       id: 'f',
@@ -18,6 +19,7 @@ export default function Home() {
       method: 'POST',
       body: JSON.stringify({
         biz: biz.map((b) => b.val).filter((addr) => !!addr),
+        chain: chain,
       }),
     })
     const data = await res.json()
@@ -25,8 +27,18 @@ export default function Home() {
     setIntersectionData(data)
     ;(document.getElementById(MODAL_ID)! as HTMLDialogElement).showModal()
   }
+
+  const handleChain = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setChain(e.target.checked ? 'eth' : 'sol')
+  }
+
   return (
     <main className='flex min-h-screen flex-col items-center p-24'>
+      <label className='swap mb-10'>
+        <input type='checkbox' onChange={handleChain} />
+        <div className='swap-on'>ETH</div>
+        <div className='swap-off'>SOL</div>
+      </label>
       {biz.map((v, idx) => {
         return (
           <div className='mb-10 w-[320px] relative' key={idx}>
