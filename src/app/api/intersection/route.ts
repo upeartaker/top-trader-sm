@@ -42,7 +42,6 @@ export async function POST(request: Request) {
         'Content-Type': 'application/json',
       },
       method: 'POST',
-      redirect: 'follow',
     }).then((res) => res.json())
   })
 
