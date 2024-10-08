@@ -26,28 +26,43 @@ export async function POST(request: Request) {
   if (!Array.isArray(params?.biz) || params?.biz.length < 1) {
     return Response.json([])
   }
+
+  const proxyURL = 'http://104.238.148.248:6011/v1'
   const chain = params.chain || 'sol'
   const getTopTraders = params.biz.map((addr: string) => {
-    return fetch(
-      `https://gmgn.ai/defi/quotation/v1/tokens/top_traders/${chain}/${addr}?orderby=realized_profit&direction=desc`,
-      {
-        method: 'GET',
-      }
-    ).then((res) => res.json())
+    const url = `https://gmgn.ai/defi/quotation/v1/tokens/top_traders/${chain}/${addr}?orderby=realized_profit&direction=desc`
+    console.log(123, url)
+    return fetch(proxyURL, {
+      body: JSON.stringify({
+        cmd: 'request.get',
+        url: url,
+        maxTimeout: 60000,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      redirect: 'follow',
+    }).then((res) => res.json())
   })
 
   try {
     const data = await Promise.all(getTopTraders)
+
     const addressList = data.map((current) => {
-      return current.data.map((d: { address: string }) => {
+      const html = current?.solution?.response as string | undefined
+      const reg = /<pre.*>(.+)<\/pre>/
+      const rawData = html?.match(reg)?.[1]
+      const d = JSON.parse(rawData ?? '[]')
+      return d?.data?.map((d: { address: string }) => {
         return d.address
       })
     })
-    console.log(123,addressList)
+    console.log(123, addressList)
     const res = getArrayIntersection(addressList)
     return Response.json(res)
   } catch (error) {
-    console.log("🚀 ~ POST ~ error:", error)
+    console.log('🚀 ~ POST ~ error:', error)
     return Response.json([])
   }
 }
